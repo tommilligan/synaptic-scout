@@ -5,7 +5,6 @@
 <script>
 /* eslint-disable */
 import * as d3 from 'd3'
-import * as sigma from 'sigma'
 
 const getStartedOne = {
   "nodes": [
@@ -59,28 +58,14 @@ export default {
     }
   },
   mounted () {
-    this.startSigma()
+    this.startNetworkVisualisation()
   },
   methods: {
-    startSigma () {
-      let s = new sigma('container')
-      s.graph.read(getStartedOne);
-
-      s.refresh()
+    startNetworkVisualisation () {
     }
   }
 }
 </script>
 <style lang="scss">
-#container {
-    max-width: 400px;
-    height: 400px;
-    margin: auto;
-    position: relative;
-}
-.sigma-scene, .sigma-labels, .sigma-mouse {
-    left: 0;
-    top: 0;
-    position: absolute;
-}
+
 </style>
