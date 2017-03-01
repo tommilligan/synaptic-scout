@@ -5,6 +5,9 @@
 <script>
 /* eslint-disable */
 import * as d3 from 'd3'
+import d3Tip from "d3-tip"
+d3.tip = d3Tip;
+
 
 const graph = {
   "nodes": [
@@ -911,9 +914,17 @@ export default {
   },
   methods: {
     startNetworkVisualisation () {
+
       var svg = d3.select("svg"),
           width = +svg.attr("width"),
           height = +svg.attr("height");
+      
+      var tipLabel = d3.tip()
+        .attr('class', 'd3-tip')
+        .html(function(d) { return '<span>' + d.label + '</span>' })
+        .offset([-6, 0])
+      
+      svg.call(tipLabel);
 
       var color = d3.scaleOrdinal(d3.schemeCategory20);
 
@@ -942,6 +953,8 @@ export default {
             return parseInt(alllinks/2) + base
           })
           .attr("fill", "#c893d8")
+          .on('mouseover', tipLabel.show)
+          .on('mouseout', tipLabel.hide)
           .call(d3.drag()
               .on("start", dragstarted)
               .on("drag", dragged)
@@ -990,6 +1003,7 @@ export default {
 }
 </script>
 <style lang="scss">
+
 .links line {
   stroke: #999;
   stroke-opacity: 0.6;
@@ -1002,6 +1016,41 @@ export default {
 
 svg {
   border: solid grey 1px;
+}
+
+.d3-tip {
+  $dark: rgba(0, 0, 0, 0.6);
+  $light: rgba(255, 255, 255, 0.9);
+  $accent: #f78827;
+
+  font-family: monospace;
+  line-height: 1;
+  font-weight: bold;
+  padding: 6px;
+  background: $light;
+  color: $accent;
+  border-radius: 4px;
+  border: 2px solid $dark;
+
+  /* Creates a small triangle extender for the tooltip */
+  &:after {
+    box-sizing: border-box;
+    display: inline;
+    font-size: 10px;
+    width: 100%;
+    line-height: 1;
+    color: $dark;
+    content: "\25BC";
+    position: absolute;
+    text-align: center;
+  }
+}
+
+/* Style northward tooltips differently */
+.d3-tip.n:after {
+  margin: -1px 0 0 0;
+  top: 100%;
+  left: 0;
 }
 
 </style>
