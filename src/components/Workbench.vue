@@ -373,15 +373,21 @@ export default {
         .selectAll("line")
         .data(graph.links)
         .enter().append("line")
-          .attr("stroke-width", function(d) { return Math.sqrt(d.value); });
+          .attr("stroke-width", 1);
 
       var node = svg.append("g")
           .attr("class", "nodes")
         .selectAll("circle")
         .data(graph.nodes)
         .enter().append("circle")
-          .attr("r", 5)
-          .attr("fill", function(d) { return color(d.group); })
+          .attr("r", function(d) {
+            const alllinks = graph.links.filter(function(p) {
+              return p.source == d.id || p.target == d.id
+            }).length
+            const base = 2
+            return parseInt(alllinks/2) + base
+          })
+          .attr("fill", "#c893d8")
           .call(d3.drag()
               .on("start", dragstarted)
               .on("drag", dragged)
