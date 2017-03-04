@@ -23,11 +23,12 @@ export default {
       data: {
         nodes: [],
         links: []
-      }
+      },
+      lastSubQuery: ''
     }
   },
   mounted () {
-    this.fetchData(fullUrl)
+    this.fetchSubgraph('14')
   },
   watch: {
     data: function (newData) {
@@ -44,6 +45,10 @@ export default {
           console.error(error)
         })
     },
+    fetchSubgraph (centralNodeId) {
+      this.lastSubQuery = centralNodeId
+      this.fetchData(urljoin(partUrl, centralNodeId))
+    },
     startNetworkVisualisation () {
       var svg = d3.select("svg"),
         width = +svg.attr("width"),
@@ -54,7 +59,7 @@ export default {
 
       var tipLabel = d3.tip()
         .attr('class', 'd3-tip')
-        .html(function(d) { return '<span>' + d.label + '</span>' })
+        .html(function(d) { return '<span>' + d.props.label + '</span>' })
         .offset([-6, 0])
       
       svg.call(tipLabel);
@@ -85,13 +90,14 @@ export default {
             const base = 3
             return parseInt(alllinks/2) + base
           })
-          .attr("fill", "#c893d8")
+          .attr("fill", (d) => {
+            return (d.props.id === this.lastSubQuery) ? "#f44286" : "#c893d8"
+          })
           .on('mouseover', tipLabel.show)
           .on('mouseout', tipLabel.hide)
           .on('click', (d) => { 
             tipLabel.hide()
-            const subUrl = urljoin(partUrl, d.id)
-            this.fetchData(subUrl)
+            this.fetchSubgraph(d.props.id)
           })
           .call(d3.drag()
               .on("start", dragstarted)
