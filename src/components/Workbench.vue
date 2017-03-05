@@ -19,10 +19,52 @@ export default {
   name: 'vue-line-chart',
   data () {
     return {
-      flaggedNodes: []
+      flaggedNodes: [],
+      d3Globals: {
+        rootElement: undefined,
+        simulation: undefined,
+        tipLabel: d3.tip()
+          .attr('class', 'd3-tip')
+          .html(function(d) { return '<span>' + d.props.label + '</span>' })
+          .offset([-6, 0]),
+        menu: [
+          {
+            title: (d) => {
+              return d.props.label
+            }
+          },
+          {
+            divider: true
+          },
+          {
+            title: (d) => {
+              return (_.includes(this.flaggedNodes, d.props.id)) ? 'Unflag' : 'Flag'
+            },
+            action: (elm, d, i) => {
+              this.toggleNodeFlag(elm, d)
+            }
+          },
+          {
+            title: 'Add neighbours',
+            action: (elm, d, i) => {
+              this.addSubgraph(d.props.id)
+            }
+          },
+          {
+            divider: true
+          },
+          {
+            title: 'Recenter here',
+            action: (elm, d, i) => {
+              this.replaceSubgraph(d.props.id)
+            }
+          }
+        ]
+      }
     }
   },
   mounted () {
+    this.bindD3ToDOM()
     this.replaceSubgraph('14')
   },
   watch: {
@@ -37,6 +79,17 @@ export default {
     })
   },
   methods: {
+    bindD3ToDOM () {
+      this.d3Globals.rootElement = d3.select("svg")
+      this.d3Globals.rootElement.call(this.d3Globals.tipLabel)
+      this.d3Globals.simulation = d3.forceSimulation()
+        .force("link", d3.forceLink().id(function(d) { return d.id; }))
+        .force("charge", d3.forceManyBody())
+        .force("center", d3.forceCenter(
+          this.d3Globals.rootElement.attr("width") / 2,
+          this.d3Globals.rootElement.attr("height") / 2
+        ))
+    },
     addNodeFlag (id) {
       this.flaggedNodes.push(id)
     },
@@ -52,7 +105,10 @@ export default {
         d3.select(elm).classed('node-flag', true)
       }
     },
-    startNetworkVisualisation (newData) {
+    startNetworkVisualisation (graph) {
+      const rootElement = this.d3Globals.rootElement
+      const tipLabel = this.d3Globals.tipLabel
+      var simulation = this.d3Globals.simulation
 
       /** Reuseable d3 functions */
       const toggleClass = (el, className) => {
@@ -60,71 +116,18 @@ export default {
           return !d3.select(el).classed(className);
         });
       }
-
-      var svg = d3.select("svg"),
-        width = +svg.attr("width"),
-        height = +svg.attr("height");
       
-      svg.selectAll("g").remove()
-
-      var graph = newData;
-      console.log(graph)
-
-      var menu = [
-        {
-          title: (d) => {
-            return d.props.label
-          }
-        },
-        {
-          divider: true
-        },
-        {
-          title: (d) => {
-            return (_.includes(this.flaggedNodes, d.props.id)) ? 'Unflag' : 'Flag'
-          },
-          action: (elm, d, i) => {
-            this.toggleNodeFlag(elm, d)
-          }
-        },
-        {
-          title: 'Add neighbours',
-          action: (elm, d, i) => {
-            this.addSubgraph(d.props.id)
-          }
-        },
-        {
-          divider: true
-        },
-        {
-          title: 'Recenter here',
-          action: (elm, d, i) => {
-            this.replaceSubgraph(d.props.id)
-          }
-        }
-      ]
-
-      var tipLabel = d3.tip()
-        .attr('class', 'd3-tip')
-        .html(function(d) { return '<span>' + d.props.label + '</span>' })
-        .offset([-6, 0])
-      
-      svg.call(tipLabel);
+      rootElement.selectAll("g").remove()
 
 
-      var simulation = d3.forceSimulation()
-          .force("link", d3.forceLink().id(function(d) { return d.id; }))
-          .force("charge", d3.forceManyBody())
-          .force("center", d3.forceCenter(width / 2, height / 2));
-
-      var link = svg.append("g")
+      var link = rootElement.append("g")
           .attr("class", "links")
         .selectAll("line")
         .data(graph.links)
         .enter().append("line")
           .attr("stroke-width", 1);
 
-      var node = svg.append("g")
+      var node = rootElement.append("g")
           .attr("class", "nodes")
         .selectAll("circle")
         .data(graph.nodes)
@@ -154,7 +157,7 @@ export default {
           .on('click', (d) => { 
             this.toggleNodeFlag(d3.event.target, d)
           })
-          .on('contextmenu', d3.contextMenu(menu, {
+          .on('contextmenu', d3.contextMenu(this.d3Globals.menu, {
             onOpen: function() {
               simulation.stop();
               tipLabel.hide()
@@ -203,6 +206,8 @@ export default {
         d.fx = null;
         d.fy = null;
       }
+
+      simulation.alphaTarget(0.3).restart()
     },
     ...mapActions (['addSubgraph', 'replaceSubgraph'])
   }
