@@ -19,28 +19,24 @@ export default {
   name: 'vue-line-chart',
   data () {
     return {
-      lastSubQuery: '',
       flaggedNodes: []
     }
   },
   mounted () {
-    this.fetchSubgraph('14')
+    this.replaceSubgraph('14')
   },
   watch: {
-    data: function (newData) {
-      this.startNetworkVisualisation()
+    graphData: function (newData) {
+      this.startNetworkVisualisation(newData)
     }
   },
   computed: {
     ...mapState ({
-      data: state => state.graph.data
+      graphData: state => state.graph.data,
+      lastSubquery: state => state.graph.lastSubquery
     })
   },
   methods: {
-    fetchSubgraph (centralNodeId) {
-      this.lastSubQuery = centralNodeId
-      this.addSubgraph(centralNodeId)
-    },
     addNodeFlag (id) {
       this.flaggedNodes.push(id)
     },
@@ -56,7 +52,7 @@ export default {
         d3.select(elm).classed('node-flag', true)
       }
     },
-    startNetworkVisualisation () {
+    startNetworkVisualisation (newData) {
 
       /** Reuseable d3 functions */
       const toggleClass = (el, className) => {
@@ -71,7 +67,8 @@ export default {
       
       svg.selectAll("g").remove()
 
-      var graph = this.data;
+      var graph = newData;
+      console.log(graph)
 
       var menu = [
         {
@@ -92,9 +89,8 @@ export default {
         },
         {
           title: 'Add neighbours',
-          disabled: true,
-          action: function(elm, d, i) {
-            console.log('Not yet implemented');
+          action: (elm, d, i) => {
+            this.addSubgraph(d.props.id)
           }
         },
         {
@@ -103,7 +99,7 @@ export default {
         {
           title: 'Recenter here',
           action: (elm, d, i) => {
-            this.fetchSubgraph(d.props.id)
+            this.replaceSubgraph(d.props.id)
           }
         }
       ]
@@ -142,7 +138,7 @@ export default {
           })
           .classed("node", true)
           .classed("node-central", (d) => {
-            return d.props.id === this.lastSubQuery
+            return d.props.id === this.lastSubquery
           })
           .classed("node-flag", (d) => {
             return _.includes(this.flaggedNodes, d.props.id)
@@ -208,7 +204,7 @@ export default {
         d.fy = null;
       }
     },
-    ...mapActions (['addSubgraph'])
+    ...mapActions (['addSubgraph', 'replaceSubgraph'])
   }
 }
 </script>
