@@ -6,10 +6,13 @@
 /* eslint-disable */
 import * as d3 from 'd3'
 import d3Tip from "d3-tip"
+var d3CMenu = require('d3-context-menu');
 import axios from 'axios'
 var urljoin = require('url-join');
+var _ = require('lodash');
 
 d3.tip = d3Tip;
+d3.contextMenu = d3CMenu(d3);
 
 const apiBase = process.env.SYNAPTIC_SCOUT_BACKEND_URL || 'http://localhost:5000/'
 const fullUrl = urljoin(apiBase, 'fullgraph');
@@ -24,7 +27,8 @@ export default {
         nodes: [],
         links: []
       },
-      lastSubQuery: ''
+      lastSubQuery: '',
+      flaggedNodes: []
     }
   },
   mounted () {
@@ -49,13 +53,72 @@ export default {
       this.lastSubQuery = centralNodeId
       this.fetchData(urljoin(partUrl, centralNodeId))
     },
+    addNodeFlag (id) {
+      this.flaggedNodes.push(id)
+    },
+    removeNodeFlag (id) {
+      _.pull(this.flaggedNodes, id)
+    },
+    toggleNodeFlag (elm, d) {
+      if (_.includes(this.flaggedNodes, d.props.id)) {
+        this.removeNodeFlag(d.props.id)
+        d3.select(elm).classed('node-flag', false)
+      } else {
+        this.addNodeFlag(d.props.id)
+        d3.select(elm).classed('node-flag', true)
+      }
+    },
     startNetworkVisualisation () {
+
+      /** Reuseable d3 functions */
+      const toggleClass = (el, className) => {
+        d3.select(el).classed(className, function() {
+          return !d3.select(el).classed(className);
+        });
+      }
+
       var svg = d3.select("svg"),
         width = +svg.attr("width"),
         height = +svg.attr("height");
+      
       svg.selectAll("g").remove()
 
       var graph = this.data;
+
+      var menu = [
+        {
+          title: (d) => {
+            return d.props.label
+          }
+        },
+        {
+          divider: true
+        },
+        {
+          title: (d) => {
+            return (_.includes(this.flaggedNodes, d.props.id)) ? 'Unflag' : 'Flag'
+          },
+          action: (elm, d, i) => {
+            this.toggleNodeFlag(elm, d)
+          }
+        },
+        {
+          title: 'Add neighbours',
+          disabled: true,
+          action: function(elm, d, i) {
+            console.log('Not yet implemented');
+          }
+        },
+        {
+          divider: true
+        },
+        {
+          title: 'Recenter here',
+          action: (elm, d, i) => {
+            this.fetchSubgraph(d.props.id)
+          }
+        }
+      ]
 
       var tipLabel = d3.tip()
         .attr('class', 'd3-tip')
@@ -64,7 +127,6 @@ export default {
       
       svg.call(tipLabel);
 
-      var color = d3.scaleOrdinal(d3.schemeCategory20);
 
       var simulation = d3.forceSimulation()
           .force("link", d3.forceLink().id(function(d) { return d.id; }))
@@ -90,15 +152,33 @@ export default {
             const base = 3
             return parseInt(alllinks/2) + base
           })
-          .attr("fill", (d) => {
-            return (d.props.id === this.lastSubQuery) ? "#f44286" : "#c893d8"
+          .classed("node", true)
+          .classed("node-central", (d) => {
+            return d.props.id === this.lastSubQuery
           })
-          .on('mouseover', tipLabel.show)
-          .on('mouseout', tipLabel.hide)
+          .classed("node-flag", (d) => {
+            return _.includes(this.flaggedNodes, d.props.id)
+          })
+          .on('mouseover', function(d, i) {
+            tipLabel.show(d, i)
+            d3.select(this).classed('node-hover', true)
+          })
+          .on('mouseout', function(d, i) {
+            tipLabel.hide(d, i)
+            d3.select(this).classed('node-hover', false)
+          })
           .on('click', (d) => { 
-            tipLabel.hide()
-            this.fetchSubgraph(d.props.id)
+            this.toggleNodeFlag(d3.event.target, d)
           })
+          .on('contextmenu', d3.contextMenu(menu, {
+            onOpen: function() {
+              simulation.stop();
+              tipLabel.hide()
+            },
+            onClose: function() {
+              simulation.restart();
+            }
+          }))
           .call(d3.drag()
               .on("start", dragstarted)
               .on("drag", dragged)
@@ -145,32 +225,27 @@ export default {
 </script>
 <style lang="scss">
 
-.links line {
-  stroke: #999;
-  stroke-opacity: 0.6;
-}
+$border-radius-global: 4px;
 
-.nodes circle {
-  stroke: #fff;
-  stroke-width: 1.5px;
-}
+$dark: rgba(0, 0, 0, 1);
+$light: rgba(255, 255, 255, 1);
+$accent: #f78827;
+$ashen-grey: #d4d4d4;
+$dolphin-grey: #f2f2f2;
 
-svg {
-  border: solid grey 1px;
-}
+/** 
+* d3-tip styles 
+*/
 
 .d3-tip {
-  $dark: rgba(0, 0, 0, 0.6);
-  $light: rgba(255, 255, 255, 0.9);
-  $accent: #f78827;
 
   font-family: monospace;
   line-height: 1;
   font-weight: bold;
-  padding: 6px;
+  padding: 4px 6px;
   background: $light;
   color: $accent;
-  border-radius: 4px;
+  border-radius: $border-radius-global;
   border: 2px solid $dark;
 
   /* Creates a small triangle extender for the tooltip */
@@ -185,13 +260,113 @@ svg {
     position: absolute;
     text-align: center;
   }
+
+  /* Style northward tooltips differently */
+  &.n:after {
+    margin: -1px 0 0 0;
+    top: 100%;
+    left: 0;
+  }
 }
 
-/* Style northward tooltips differently */
-.d3-tip.n:after {
-  margin: -1px 0 0 0;
-  top: 100%;
-  left: 0;
+
+/**
+* d3-context-menu styles
+*/
+
+.d3-context-menu {
+	position: absolute;
+	display: none;
+	background-color: $light;
+	border-radius: $border-radius-global;
+
+	font-family: monospace;
+	font-size: 12px;
+	min-width: 150px;
+	border: 2px solid $ashen-grey;
+
+	z-index:1200;
+
+  ul {
+    list-style-type: none;
+    margin: 4px 0px;
+    padding: 0px;
+    cursor: default;
+
+    li {
+      padding: 4px 16px;
+      user-select: none;
+    
+      &:hover {
+        background-color: lighten($accent, 30%);
+      }
+
+      /*
+        Header
+      */
+      &.is-header,
+      &.is-header:hover {
+	      background-color: $light;
+        font-weight: bold;
+        text-align: center;
+      }
+
+      /*
+        Disabled
+      */
+
+      &.is-disabled,
+      &.is-disabled:hover {
+        background-color: $dolphin-grey;
+        color: #888;
+        cursor: not-allowed;
+      }
+
+      /*
+        Divider
+      */
+
+      &.is-divider {
+        padding: 0px 0px;
+      }
+    }
+
+    hr {
+      border: 0;
+      height: 0;
+      border-top: 1px solid $ashen-grey;
+      border-bottom: 1px solid lighten($ashen-grey, 20%);
+    }
+  }
 }
+
+.links line {
+  stroke: #999;
+  stroke-opacity: 0.6;
+}
+
+svg {
+  border: solid grey 1px;
+}
+
+.node {
+  fill: #c893d8;
+  stroke: #fff;
+  stroke-width: 1.5px;
+
+  &-central {
+    fill: #f44286;
+  }
+
+  &-flag {
+    stroke: #720067;
+    stroke-width: 2.5px;
+  }
+
+  &-hover {
+    fill: $accent;
+  }
+}
+
 
 </style>
