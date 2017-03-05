@@ -33,9 +33,7 @@ const mutations = {
     var mergedData = {}
 
     // if node already exists, overwrite, otherwise additional
-    console.log(oldData.nodes)
     mergedData.nodes = _.unionBy(newData.nodes, oldData.nodes, node => node.id)
-    console.log(mergedData.nodes)
     // same for links
     mergedData.links = _.unionBy(newData.links, oldData.links, link => link.id)
     state.graph.data = mergedData

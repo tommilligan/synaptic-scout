@@ -20,56 +20,56 @@ export default {
   data () {
     return {
       flaggedNodes: [],
-      d3Globals: {
-        rootElement: undefined,
-        simulation: undefined,
-        tipLabel: d3.tip()
-          .attr('class', 'd3-tip')
-          .html(function(d) { return '<span>' + d.props.label + '</span>' })
-          .offset([-6, 0]),
-        menu: [
-          {
-            title: (d) => {
-              return d.props.label
-            }
-          },
-          {
-            divider: true
-          },
-          {
-            title: (d) => {
-              return (_.includes(this.flaggedNodes, d.props.id)) ? 'Unflag' : 'Flag'
-            },
-            action: (elm, d, i) => {
-              this.toggleNodeFlag(elm, d)
-            }
-          },
-          {
-            title: 'Add neighbours',
-            action: (elm, d, i) => {
-              this.addSubgraph(d.props.id)
-            }
-          },
-          {
-            divider: true
-          },
-          {
-            title: 'Recenter here',
-            action: (elm, d, i) => {
-              this.replaceSubgraph(d.props.id)
-            }
+      rootElement: undefined,
+      simulation: undefined,
+      node: undefined,
+      link: undefined,
+      tipLabel: d3.tip()
+        .attr('class', 'd3-tip')
+        .html((d) => { return '<span>' + d.props.label + '</span>' })
+        .offset([-6, 0]),
+      menu: [
+        {
+          title: (d) => {
+            return d.props.label
           }
-        ]
-      }
+        },
+        {
+          divider: true
+        },
+        {
+          title: (d) => {
+            return (_.includes(this.flaggedNodes, d.props.id)) ? 'Unflag' : 'Flag'
+          },
+          action: (elm, d, i) => {
+            this.toggleNodeFlag(elm, d)
+          }
+        },
+        {
+          title: 'Add neighbours',
+          action: (elm, d, i) => {
+            this.addSubgraph(d.props.id)
+          }
+        },
+        {
+          divider: true
+        },
+        {
+          title: 'Recenter here',
+          action: (elm, d, i) => {
+            this.replaceSubgraph(d.props.id)
+          }
+        }
+      ]
     }
   },
   mounted () {
-    this.bindD3ToDOM()
+    this.intialiseGraph()
     this.replaceSubgraph('14')
   },
   watch: {
     graphData: function (newData) {
-      this.startNetworkVisualisation(newData)
+      this.restartGraph()
     }
   },
   computed: {
@@ -79,16 +79,23 @@ export default {
     })
   },
   methods: {
-    bindD3ToDOM () {
-      this.d3Globals.rootElement = d3.select("svg")
-      this.d3Globals.rootElement.call(this.d3Globals.tipLabel)
-      this.d3Globals.simulation = d3.forceSimulation()
-        .force("link", d3.forceLink().id(function(d) { return d.id; }))
+    intialiseGraph () {
+      this.rootElement = d3.select("svg")
+      this.rootElement.call(this.tipLabel)
+      this.simulation = d3.forceSimulation()
+        .force("link", d3.forceLink()
+          .id(d => d.id))
         .force("charge", d3.forceManyBody())
         .force("center", d3.forceCenter(
-          this.d3Globals.rootElement.attr("width") / 2,
-          this.d3Globals.rootElement.attr("height") / 2
+          this.rootElement.attr("width") / 2,
+          this.rootElement.attr("height") / 2
         ))
+      this.link = this.rootElement.append("g")
+        .attr("class", "links")
+        .selectAll("line")
+      this.node = this.rootElement.append("g")
+        .attr("class", "nodes")
+        .selectAll("circle")
     },
     addNodeFlag (id) {
       this.flaggedNodes.push(id)
@@ -105,109 +112,105 @@ export default {
         d3.select(elm).classed('node-flag', true)
       }
     },
-    startNetworkVisualisation (graph) {
-      const rootElement = this.d3Globals.rootElement
-      const tipLabel = this.d3Globals.tipLabel
-      var simulation = this.d3Globals.simulation
-
+    ticked () {
+      this.link
+        .attr("x1", d => d.source.x)
+        .attr("y1", d => d.source.y)
+        .attr("x2", d => d.target.x)
+        .attr("y2", d => d.target.y)
+      this.node
+        .attr("cx", d => d.x)
+        .attr("cy", d => d.y)
+    },
+    dragstarted (d) {
+      if (!d3.event.active) this.simulation.alphaTarget(0.3).restart();
+      d.fx = d.x;
+      d.fy = d.y;
+    },
+    dragged (d) {
+      d.fx = d3.event.x;
+      d.fy = d3.event.y;
+    },
+    dragended (d) {
+      if (!d3.event.active) this.simulation.alphaTarget(0);
+      d.fx = null;
+      d.fy = null;
+    },
+    restartGraph () {
       /** Reuseable d3 functions */
       const toggleClass = (el, className) => {
-        d3.select(el).classed(className, function() {
+        d3.select(el).classed(className, () => {
           return !d3.select(el).classed(className);
         });
       }
+
+      this.simulation.stop()
       
-      rootElement.selectAll("g").remove()
+      // this.rootElement.selectAll("g").remove()
+      this.link = this.link.data(this.graphData.links, d => d.id)
+      this.link.exit().remove()
+      this.link = this.link.enter()
+        .append("line")
+        .attr("stroke-width", 1)
+        .merge(this.link)
 
+      this.node = this.node.data(this.graphData.nodes, d => d.id)
+      this.node.exit().remove()
+      this.node = this.node.enter()
+        .append("circle")
+        .attr("r", (d) => {
+          const allLinks = this.graphData.links.filter((p) => {
+            return p.source == d.id || p.target == d.id
+          }).length
+          const base = 5
+          return parseInt(allLinks/3) + base
+        })
+        .attr("cx", 30)
+        .attr("cy", 60)
+        .classed("node", true)
+        .classed("node-central", (d) => {
+          return d.props.id === this.lastSubquery
+        })
+        .classed("node-flag", (d) => {
+          return _.includes(this.flaggedNodes, d.props.id)
+        })
+        .on('mouseover', (d, i) => {
+          this.tipLabel.show(d, i)
+          d3.select(d3.event.target).classed('node-hover', true)
+        })
+        .on('mouseout', (d, i) => {
+          this.tipLabel.hide(d, i)
+          d3.select(d3.event.target).classed('node-hover', false)
+        })
+        .on('click', (d) => {
+          this.toggleNodeFlag(d3.event.target, d)
+        })
+        .on('contextmenu', d3.contextMenu(this.menu, {
+          onOpen: () => {
+            this.simulation.stop();
+            this.tipLabel.hide()
+          },
+          onClose: () => {
+            this.simulation.restart();
+          }
+        }))
+        .call(d3.drag()
+          .on("start", this.dragstarted)
+          .on("drag", this.dragged)
+          .on("end", this.dragended))
+        .merge(this.node)
 
-      var link = rootElement.append("g")
-          .attr("class", "links")
-        .selectAll("line")
-        .data(graph.links)
-        .enter().append("line")
-          .attr("stroke-width", 1);
+      this.simulation
+        .nodes(this.graphData.nodes)
+        .on("tick", this.ticked)
 
-      var node = rootElement.append("g")
-          .attr("class", "nodes")
-        .selectAll("circle")
-        .data(graph.nodes)
-        .enter().append("circle")
-          .attr("r", function(d) {
-            const alllinks = graph.links.filter(function(p) {
-              return p.source == d.id || p.target == d.id
-            }).length
-            const base = 3
-            return parseInt(alllinks/2) + base
-          })
-          .classed("node", true)
-          .classed("node-central", (d) => {
-            return d.props.id === this.lastSubquery
-          })
-          .classed("node-flag", (d) => {
-            return _.includes(this.flaggedNodes, d.props.id)
-          })
-          .on('mouseover', function(d, i) {
-            tipLabel.show(d, i)
-            d3.select(this).classed('node-hover', true)
-          })
-          .on('mouseout', function(d, i) {
-            tipLabel.hide(d, i)
-            d3.select(this).classed('node-hover', false)
-          })
-          .on('click', (d) => { 
-            this.toggleNodeFlag(d3.event.target, d)
-          })
-          .on('contextmenu', d3.contextMenu(this.d3Globals.menu, {
-            onOpen: function() {
-              simulation.stop();
-              tipLabel.hide()
-            },
-            onClose: function() {
-              simulation.restart();
-            }
-          }))
-          .call(d3.drag()
-              .on("start", dragstarted)
-              .on("drag", dragged)
-              .on("end", dragended));
+      this.simulation
+        .force("link")
+        .links(this.graphData.links)
 
-      simulation
-          .nodes(graph.nodes)
-          .on("tick", ticked);
-
-      simulation.force("link")
-          .links(graph.links);
-
-      function ticked() {
-        link
-            .attr("x1", function(d) { return d.source.x; })
-            .attr("y1", function(d) { return d.source.y; })
-            .attr("x2", function(d) { return d.target.x; })
-            .attr("y2", function(d) { return d.target.y; });
-
-        node
-            .attr("cx", function(d) { return d.x; })
-            .attr("cy", function(d) { return d.y; });
-        }
-
-      function dragstarted(d) {
-        if (!d3.event.active) simulation.alphaTarget(0.3).restart();
-        d.fx = d.x;
-        d.fy = d.y;
-      }
-
-      function dragged(d) {
-        d.fx = d3.event.x;
-        d.fy = d3.event.y;
-      }
-
-      function dragended(d) {
-        if (!d3.event.active) simulation.alphaTarget(0);
-        d.fx = null;
-        d.fy = null;
-      }
-
-      simulation.alphaTarget(0.3).restart()
+      this.simulation
+        .alpha(1)
+        .restart()
     },
     ...mapActions (['addSubgraph', 'replaceSubgraph'])
   }
