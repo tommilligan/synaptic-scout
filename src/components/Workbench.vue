@@ -4,29 +4,21 @@
 
 <script>
 /* eslint-disable */
+import { mapState, mapActions } from 'vuex'
+
 import * as d3 from 'd3'
 import d3Tip from "d3-tip"
 var d3CMenu = require('d3-context-menu');
-import axios from 'axios'
 var urljoin = require('url-join');
 var _ = require('lodash');
 
 d3.tip = d3Tip;
 d3.contextMenu = d3CMenu(d3);
 
-const apiBase = process.env.SYNAPTIC_SCOUT_BACKEND_URL || 'http://localhost:5000/'
-const fullUrl = urljoin(apiBase, 'fullgraph');
-const partUrl = urljoin(apiBase, 'subgraph');
-
-
 export default {
   name: 'vue-line-chart',
   data () {
     return {
-      data: {
-        nodes: [],
-        links: []
-      },
       lastSubQuery: '',
       flaggedNodes: []
     }
@@ -39,19 +31,15 @@ export default {
       this.startNetworkVisualisation()
     }
   },
+  computed: {
+    ...mapState ({
+      data: state => state.graph.data
+    })
+  },
   methods: {
-    fetchData: function (dataUrl) {
-      axios.get(dataUrl)
-        .then((response) => {
-          this.data = response.data
-        })
-        .catch((error) => {
-          console.error(error)
-        })
-    },
     fetchSubgraph (centralNodeId) {
       this.lastSubQuery = centralNodeId
-      this.fetchData(urljoin(partUrl, centralNodeId))
+      this.addSubgraph(centralNodeId)
     },
     addNodeFlag (id) {
       this.flaggedNodes.push(id)
@@ -219,7 +207,8 @@ export default {
         d.fx = null;
         d.fy = null;
       }
-    }
+    },
+    ...mapActions (['addSubgraph'])
   }
 }
 </script>
