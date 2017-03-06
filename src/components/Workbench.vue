@@ -65,7 +65,7 @@ export default {
   },
   mounted () {
     this.intialiseGraph()
-    this.replaceSubgraph('14')
+    this.replaceSubgraph('59')
   },
   watch: {
     graphData: function (newData) {
@@ -158,22 +158,7 @@ export default {
       this.node.exit().remove()
       this.node = this.node.enter()
         .append("circle")
-        .attr("r", (d) => {
-          const allLinks = this.graphData.links.filter((p) => {
-            return p.source == d.id || p.target == d.id
-          }).length
-          const base = 5
-          return parseInt(allLinks/3) + base
-        })
-        .attr("cx", 30)
-        .attr("cy", 60)
         .classed("node", true)
-        .classed("node-central", (d) => {
-          return d.props.id === this.lastSubquery
-        })
-        .classed("node-flag", (d) => {
-          return _.includes(this.flaggedNodes, d.props.id)
-        })
         .on('mouseover', (d, i) => {
           this.tipLabel.show(d, i)
           d3.select(d3.event.target).classed('node-hover', true)
@@ -198,7 +183,21 @@ export default {
           .on("start", this.dragstarted)
           .on("drag", this.dragged)
           .on("end", this.dragended))
+        .attr("r", (d) => {
+          var allLinks = this.graphData.links.filter((p) => {
+            return p.source == d.id || p.target == d.id
+          }).length
+          const base = 5
+          return parseInt(allLinks/3) + base
+        })
         .merge(this.node)
+      this.node = this.node
+        .classed("node-central", (d) => {
+          return d.props.id === this.lastSubquery
+        })
+        .classed("node-flag", (d) => {
+          return _.includes(this.flaggedNodes, d.props.id)
+        })
 
       this.simulation
         .nodes(this.graphData.nodes)
@@ -209,7 +208,7 @@ export default {
         .links(this.graphData.links)
 
       this.simulation
-        .alpha(1)
+        .alpha(0.3)
         .restart()
     },
     ...mapActions (['addSubgraph', 'replaceSubgraph'])

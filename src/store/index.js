@@ -17,7 +17,8 @@ const state = {
       links: []
     },
     flaggedNodes: [],
-    lastSubquery: ''
+    lastSubquery: '',
+    fullyLoaded: []
   }
 }
 
@@ -33,9 +34,10 @@ const mutations = {
     var mergedData = {}
 
     // if node already exists, overwrite, otherwise additional
-    mergedData.nodes = _.unionBy(newData.nodes, oldData.nodes, node => node.id)
+    mergedData.nodes = _.unionBy(oldData.nodes, newData.nodes, node => node.id)
     // same for links
-    mergedData.links = _.unionBy(newData.links, oldData.links, link => link.id)
+    mergedData.links = _.unionBy(oldData.links, newData.links, link => link.id)
+    console.debug(`Added ${mergedData.nodes.length - oldData.nodes.length} nodes and ${mergedData.links.length - oldData.links.length} links`)
     state.graph.data = mergedData
   },
   replaceGraphData (state, newData) {
@@ -43,6 +45,7 @@ const mutations = {
     state.graph.data = newData
   },
   updateLastSubquery (state, centralNodeId) {
+    console.log('Updating the last subquery')
     state.graph.lastSubquery = centralNodeId
   }
 }
