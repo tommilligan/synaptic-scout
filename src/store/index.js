@@ -18,7 +18,7 @@ const state = {
     },
     flaggedNodes: [],
     lastSubquery: '',
-    fullyLoaded: []
+    subqueried: []
   }
 }
 
@@ -47,6 +47,14 @@ const mutations = {
   updateLastSubquery (state, centralNodeId) {
     console.log('Updating the last subquery')
     state.graph.lastSubquery = centralNodeId
+  },
+  resetSubqueried (state) {
+    console.log('Resetting nodes known to be subqueried')
+    state.graph.subqueried = []
+  },
+  addSubquery (state, centralNodeId) {
+    console.log('Adding known subquery')
+    state.graph.subqueried = _.concat(state.graph.subqueried, centralNodeId)
   }
 }
 
@@ -63,6 +71,7 @@ const actions = {
       .catch((error) => {
         console.error(error)
       })
+    commit('addSubquery', centralNodeId)
     commit('updateLastSubquery', centralNodeId)
   },
   replaceSubgraph ({ commit }, centralNodeId) {
@@ -75,6 +84,8 @@ const actions = {
       .catch((error) => {
         console.error(error)
       })
+    commit('resetSubqueried')
+    commit('addSubquery', centralNodeId)
     commit('updateLastSubquery', centralNodeId)
   }
 }

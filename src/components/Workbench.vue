@@ -75,7 +75,8 @@ export default {
   computed: {
     ...mapState ({
       graphData: state => state.graph.data,
-      lastSubquery: state => state.graph.lastSubquery
+      lastSubquery: state => state.graph.lastSubquery,
+      subqueried: state => state.graph.subqueried
     })
   },
   methods: {
@@ -197,6 +198,9 @@ export default {
         })
         .classed("node-flag", (d) => {
           return _.includes(this.flaggedNodes, d.props.id)
+        })
+        .classed("node-subqueried", (d) => {
+          return _.includes(this.subqueried, d.props.id)
         })
 
       this.simulation
@@ -342,12 +346,17 @@ svg {
 }
 
 .node {
-  fill: #c893d8;
+  fill: #cb6fe8;
   stroke: #fff;
   stroke-width: 1.5px;
 
+  &-subqueried {
+    fill: #c8c5c9;
+  }
+
   &-central {
-    fill: #f44286;
+    fill: #ff0766;
+    stroke: #fff;
   }
 
   &-flag {
