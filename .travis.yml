@@ -1,0 +1,15 @@
+language: node_js
+node_js:
+  - "node"
+install: npm install
+script: npm run unit
+after_success:
+  - "npm run build"
+deploy:
+  provider: heroku
+  api_key:
+    secure: $HEROKU_API_KEY
+  skip_cleanup: true
+  app:
+    develop: synaptic-scout-staging
+    master: synaptic-scout
