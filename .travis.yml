@@ -3,14 +3,13 @@ node_js:
   - "node"
 install: npm install
 script: npm run unit
-after_success:
-  - "npm run build"
 deploy:
   provider: heroku
   api_key:
     secure: $HEROKU_API_KEY
   run:
     - "npm run build"
+    - restart
   app:
     develop: synaptic-scout-staging
     master: synaptic-scout
