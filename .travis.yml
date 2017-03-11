@@ -7,9 +7,6 @@ deploy:
   provider: heroku
   api_key:
     secure: $HEROKU_API_KEY
-  run:
-    - "npm run build"
-    - restart
   app:
     develop: synaptic-scout-staging
     master: synaptic-scout
