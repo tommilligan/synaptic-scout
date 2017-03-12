@@ -1,7 +1,7 @@
 <template>
   <div>
     <form v-on:submit.prevent.capture="submitQuery">
-      <input v-model="query" placeholder="dolphin name">
+      <input v-model="query" placeholder="dolphin name (Ripplefluke, Zap, TR82)" id="dolphinName">
     </form>
     <svg width="600" height="500"></svg>
   </div>
@@ -269,6 +269,21 @@ $accent: #f78827;
 $ashen-grey: #d4d4d4;
 $dolphin-grey: #f2f2f2;
 
+input {
+  padding: 5px;
+  border: solid 4px $ashen-grey;
+  border-radius: 5px;
+  transition: border 0.3s;
+
+  &:focus, &.focus {
+    border-color: $accent;
+  }
+
+  &#dolphinName {
+    width: 300px;
+  }
+}
+
 /** 
 * d3-tip styles 
 */
@@ -319,7 +334,7 @@ $dolphin-grey: #f2f2f2;
 	font-family: monospace;
 	font-size: 12px;
 	min-width: 150px;
-	border: 2px solid $ashen-grey;
+	border: 2px solid $accent;
 
 	z-index:1200;
 
@@ -383,6 +398,7 @@ $dolphin-grey: #f2f2f2;
 
 svg {
   border: solid grey 1px;
+  margin: 5px 0px;
 }
 
 .node {
