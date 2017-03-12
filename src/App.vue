@@ -1,7 +1,8 @@
 <template>
   <div id="app">
     <navigation />
-    <transition name="fade">
+    <flash :message="$store.state.flash"/>
+    <transition name="fade" mode="out-in">
       <router-view></router-view>
     </transition>
   </div>
@@ -9,11 +10,13 @@
 
 <script>
 import Navigation from '@/components/Navigation'
+import Flash from '@/components/Flash'
 
 export default {
   name: 'app',
   components: {
-    Navigation
+    Navigation,
+    Flash
   }
 }
 </script>
@@ -21,6 +24,14 @@ export default {
 <style>
 
 @import url('https://fonts.googleapis.com/css?family=Ubuntu|Ubuntu+Mono');
+
+body {
+  margin: 0px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 0.75rem 0;
+}
 
 #app {
   font-family: 'Ubuntu', Helvetica, Arial, sans-serif;

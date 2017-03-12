@@ -1,9 +1,9 @@
 <template>
   <div>
     <form v-on:submit.prevent.capture="submitQuery">
-      <input v-model="query" placeholder="dolphin name (Ripplefluke, Zap, TR82)" id="dolphinName">
+      <input v-model="query" placeholder="dolphin name (Ripplefluke, Zap, TR82)" id="dolphinName" autocomplete="off" autofocus="on">
     </form>
-    <svg width="600" height="500"></svg>
+    <svg width="600" height="400"></svg>
   </div>
 </template>
 
@@ -106,6 +106,7 @@ export default {
   methods: {
     submitQuery () {
       this.updateGraphWithSearch(this.query, this.replaceSubgraph)
+      this.query = ''
     },
     updateGraphWithSearch (search_id, thenCallback = (id) => {}) {
       const seedUrl = urljoin(endpoints.seedgraph, `?label=${search_id}`)
@@ -118,6 +119,7 @@ export default {
         })
         .catch((error) => {
           console.error(error)
+          this.flashMessage('Error connecting to isoprene-pumpjack API')
         })
     },
     intialiseGraph () {
@@ -255,7 +257,11 @@ export default {
         .alpha(0.3)
         .restart()
     },
-    ...mapActions (['addSubgraph', 'replaceSubgraph'])
+    ...mapActions ([
+      'addSubgraph',
+      'replaceSubgraph',
+      'flashMessage'
+    ])
   }
 }
 </script>
@@ -271,7 +277,7 @@ $dolphin-grey: #f2f2f2;
 
 input {
   padding: 5px;
-  margin: 5px;
+  margin: 3px;
   border: solid 4px $ashen-grey;
   border-radius: 5px;
   transition: border 0.3s;

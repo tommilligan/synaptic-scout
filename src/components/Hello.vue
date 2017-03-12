@@ -113,7 +113,7 @@ h2 {
 }
 
 .credits {
-  $logo-size: 64px;
+  $logo-size: 48px;
 
   ul {
     list-style-type: none;

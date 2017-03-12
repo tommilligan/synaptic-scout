@@ -1,7 +1,7 @@
 <template>
   <div>
     <nav>
-      <router-link exact to="/">Home</router-link>
+      <router-link exact to="/">Explore</router-link>
       <router-link exact to="/about">About</router-link>
     </nav>
   </div>
@@ -25,7 +25,7 @@ nav{
 
   a{
     display: inline-block;
-    padding: 14px 30px;
+    padding: 10px 30px;
     font-weight:bold;
     color: #2c3e50;
     font-size:16px;

@@ -19,7 +19,8 @@ const state = {
     flaggedNodes: [],
     lastSubquery: '',
     subqueried: []
-  }
+  },
+  flash: ''
 }
 
 // mutations are operations that actually mutates the state.
@@ -28,6 +29,10 @@ const state = {
 // mutations must be synchronous and can be recorded by plugins
 // for debugging purposes.
 const mutations = {
+  updateFlashMessage (state, message) {
+    console.debug('Updating flash message')
+    state.flash = message
+  },
   mergeGraphData (state, newData) {
     console.log('Merging graph data')
     const oldData = state.graph.data
@@ -61,6 +66,14 @@ const mutations = {
 // actions are functions that causes side effects and can involve
 // asynchronous operations.
 const actions = {
+  flashMessage ({ commit }, message) {
+    console.debug('Flashing message')
+    commit('updateFlashMessage', message)
+  },
+  flashClear ({ commit }) {
+    console.debug('Clearing flash message')
+    commit('updateFlashMessage', '')
+  },
   addSubgraph ({ commit }, centralNodeId) {
     const getUrl = urljoin(endpoints.subgraph, centralNodeId)
     console.log('Adding subgraph from ' + getUrl)
@@ -70,6 +83,7 @@ const actions = {
       })
       .catch((error) => {
         console.error(error)
+        commit('updateFlashMessage', 'Error connecting to isoprene-pumpjack API')
       })
     commit('addSubquery', centralNodeId)
     commit('updateLastSubquery', centralNodeId)
@@ -83,6 +97,7 @@ const actions = {
       })
       .catch((error) => {
         console.error(error)
+        commit('updateFlashMessage', 'Error connecting to isoprene-pumpjack API')
       })
     commit('resetSubqueried')
     commit('addSubquery', centralNodeId)
