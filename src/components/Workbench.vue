@@ -271,6 +271,7 @@ $dolphin-grey: #f2f2f2;
 
 input {
   padding: 5px;
+  margin: 5px;
   border: solid 4px $ashen-grey;
   border-radius: 5px;
   transition: border 0.3s;
@@ -398,7 +399,6 @@ input {
 
 svg {
   border: solid grey 1px;
-  margin: 5px 0px;
 }
 
 .node {

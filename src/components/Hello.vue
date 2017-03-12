@@ -56,12 +56,12 @@ export default {
               alt: 'Flask',
               url: 'http://flask.pocoo.org/',
               logo: require('../assets/logos/flask.svg')
-            },
+            }/** ,
             {
               alt: 'Redis',
               url: 'https://redis.io/',
               logo: require('../assets/logos/redis.svg')
-            }
+            }**/
           ]
         },
         {
