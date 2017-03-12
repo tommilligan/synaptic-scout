@@ -1,5 +1,10 @@
 <template>
-  <svg width="600" height="500"></svg>
+  <div>
+    <form v-on:submit.prevent.capture="submitQuery">
+      <input v-model="query" placeholder="dolphin name">
+    </form>
+    <svg width="600" height="500"></svg>
+  </div>
 </template>
 
 <script>
@@ -11,6 +16,9 @@ import d3Tip from "d3-tip"
 var d3CMenu = require('d3-context-menu');
 var urljoin = require('url-join');
 var _ = require('lodash');
+import axios from 'axios'
+
+import endpoints from '../constants/endpoints'
 
 d3.tip = d3Tip;
 d3.contextMenu = d3CMenu(d3);
@@ -19,6 +27,7 @@ export default {
   name: 'vue-line-chart',
   data () {
     return {
+      query: '',
       flaggedNodes: [],
       rootElement: undefined,
       simulation: undefined,
@@ -80,6 +89,18 @@ export default {
     })
   },
   methods: {
+    submitQuery () {
+      const seedUrl = urljoin(endpoints.seedgraph, `?label=${this.query}`)
+      console.log('Seeding graph with ' + seedUrl)
+      axios.get(seedUrl)
+        .then((response) => {
+          const seed_id = response.data.id
+          this.replaceSubgraph(seed_id)
+        })
+        .catch((error) => {
+          console.error(error)
+        })
+    },
     intialiseGraph () {
       this.rootElement = d3.select("svg")
       this.rootElement.call(this.tipLabel)
