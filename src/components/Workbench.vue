@@ -55,18 +55,33 @@ export default {
           }
         },
         {
-          title: 'Add neighbours',
+          divider: true
+        },
+        {
+          title: 'Show neighbours',
           action: (elm, d, i) => {
             this.addSubgraph(d.props.id)
+          }
+        },
+        {
+          title: 'Restart here',
+          action: (elm, d, i) => {
+            this.replaceSubgraph(d.props.id)
           }
         },
         {
           divider: true
         },
         {
-          title: 'Recenter here',
+          title: 'Search for neighbours',
           action: (elm, d, i) => {
-            this.replaceSubgraph(d.props.id)
+            this.updateGraphWithSearch(d.props.id, this.addSubgraph)
+          }
+        },
+        {
+          title: 'Re-seed graph here',
+          action: (elm, d, i) => {
+            this.updateGraphWithSearch(d.props.id, this.replaceSubgraph)
           }
         }
       ]
@@ -90,12 +105,16 @@ export default {
   },
   methods: {
     submitQuery () {
-      const seedUrl = urljoin(endpoints.seedgraph, `?label=${this.query}`)
-      console.log('Seeding graph with ' + seedUrl)
+      this.updateGraphWithSearch(this.query, this.replaceSubgraph)
+    },
+    updateGraphWithSearch (search_id, thenCallback = (id) => {}) {
+      const seedUrl = urljoin(endpoints.seedgraph, `?label=${search_id}`)
+      console.log('Updating graph database with search ' + seedUrl)
       axios.get(seedUrl)
         .then((response) => {
-          const seed_id = response.data.id
-          this.replaceSubgraph(seed_id)
+          const response_id = response.data.id
+          console.log(`Graph updated with node ${response_id}`)
+          thenCallback(response_id)
         })
         .catch((error) => {
           console.error(error)
