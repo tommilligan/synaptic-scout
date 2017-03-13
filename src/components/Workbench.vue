@@ -127,8 +127,13 @@ export default {
       this.rootElement.call(this.tipLabel)
       this.simulation = d3.forceSimulation()
         .force("link", d3.forceLink()
+          .distance(15)
+          .strength((link) => {
+            return 3 / Math.min(this.countLinks(link.source), this.countLinks(link.target));
+          })
           .id(d => d.id))
-        .force("charge", d3.forceManyBody())
+        .force("charge", d3.forceManyBody()
+          .strength(-60))
         .force("center", d3.forceCenter(
           this.rootElement.attr("width") / 2,
           this.rootElement.attr("height") / 2
@@ -179,6 +184,11 @@ export default {
       d.fx = null;
       d.fy = null;
     },
+    countLinks (d_id) {
+      return this.graphData.links.filter((p) => {
+        return p.source == d_id || p.target == d_id
+      }).length
+    },
     restartGraph () {
       /** Reuseable d3 functions */
       const toggleClass = (el, className) => {
@@ -202,6 +212,12 @@ export default {
       this.node = this.node.enter()
         .append("circle")
         .classed("node", true)
+        .classed("node-document", (d) => {
+          return _.includes(d.labels, 'Document')
+        })
+        .classed("node-dolphin", (d) => {
+          return _.includes(d.labels, 'Dolphin')
+        })
         .on('mouseover', (d, i) => {
           this.tipLabel.show(d, i)
           d3.select(d3.event.target).classed('node-hover', true)
@@ -227,9 +243,7 @@ export default {
           .on("drag", this.dragged)
           .on("end", this.dragended))
         .attr("r", (d) => {
-          var allLinks = this.graphData.links.filter((p) => {
-            return p.source == d.id || p.target == d.id
-          }).length
+          var allLinks = this.countLinks(d.id)
           const base = 5
           return parseInt(allLinks/3) + base
         })
@@ -394,9 +408,17 @@ svg {
 }
 
 .node {
-  fill: #cb6fe8;
+  fill: $blackish;
   stroke: $global-background;
   stroke-width: 1.5px;
+
+  &-dolphin {
+    fill: #cb6fe8;    
+  }
+
+  &-document {
+    fill: #6fe897;    
+  }
 
   &-subqueried {
     fill: $pale-grey;
