@@ -5,7 +5,7 @@ describe('Hello.vue', () => {
   it('should render correct contents', () => {
     const Constructor = Vue.extend(Hello)
     const vm = new Constructor().$mount()
-    expect(vm.$el.querySelector('.hello h2').textContent)
+    expect(vm.$el.querySelector('.name-title').textContent)
       .to.equal('synaptic-scout | isoprene-pumpjack')
   })
 })
