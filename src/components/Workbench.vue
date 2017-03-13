@@ -1,7 +1,7 @@
 <template>
   <div>
     <form v-on:submit.prevent.capture="submitQuery">
-      <input v-model="query" placeholder="dolphin name (Ripplefluke, Zap, TR82)" id="dolphinName" autocomplete="off" autofocus="on">
+      <input v-model="query" placeholder="dolphin name (Ripplefluke, Zap, TR82)" id="dolphinName" autocomplete="off">
     </form>
     <svg width="600" height="400"></svg>
   </div>
@@ -265,20 +265,18 @@ export default {
   }
 }
 </script>
-<style lang="scss">
+<style lang="scss" scoped>
+
+@import "~sass-variables";
 
 $border-radius-global: 4px;
-
-$dark: rgba(0, 0, 0, 1);
-$light: rgba(255, 255, 255, 1);
-$accent: #f78827;
-$ashen-grey: #d4d4d4;
-$dolphin-grey: #f2f2f2;
+$light: $global-background;
 
 input {
+  font-family: 'Ubuntu Mono', monospace;
   padding: 5px;
   margin: 3px;
-  border: solid 4px $ashen-grey;
+  border: solid 3px $ashen-grey;
   border-radius: 5px;
   transition: border 0.3s;
 
@@ -296,15 +294,15 @@ input {
 */
 
 .d3-tip {
-
-  font-family: monospace;
+  font-family: 'Ubuntu Mono', monospace;
+  font-size: $font-small;
   line-height: 1;
   font-weight: bold;
   padding: 4px 6px;
   background: $light;
   color: $accent;
   border-radius: $border-radius-global;
-  border: 2px solid $dark;
+  border: 2px solid $blackish;
 
   /* Creates a small triangle extender for the tooltip */
   &:after {
@@ -313,7 +311,7 @@ input {
     font-size: 10px;
     width: 100%;
     line-height: 1;
-    color: $dark;
+    color: $blackish;
     content: "\25BC";
     position: absolute;
     text-align: center;
@@ -338,8 +336,8 @@ input {
 	background-color: $light;
 	border-radius: $border-radius-global;
 
-	font-family: monospace;
-	font-size: 12px;
+	font-family: 'Ubuntu Mono', monospace;
+	font-size: $font-small;
 	min-width: 150px;
 	border: 2px solid $accent;
 
@@ -347,21 +345,18 @@ input {
 
   ul {
     list-style-type: none;
-    margin: 4px 0px;
+    margin: $gutter-thin 0px;
     padding: 0px;
     cursor: default;
 
     li {
-      padding: 4px 16px;
+      padding: $gutter-thin $gutter;
       user-select: none;
     
       &:hover {
-        background-color: lighten($accent, 30%);
+        background-color: $accent-light;
       }
 
-      /*
-        Header
-      */
       &.is-header,
       &.is-header:hover {
 	      background-color: $light;
@@ -369,20 +364,12 @@ input {
         text-align: center;
       }
 
-      /*
-        Disabled
-      */
-
       &.is-disabled,
       &.is-disabled:hover {
         background-color: $dolphin-grey;
-        color: #888;
+        color: $auditor-grey;
         cursor: not-allowed;
       }
-
-      /*
-        Divider
-      */
 
       &.is-divider {
         padding: 0px 0px;
@@ -399,26 +386,24 @@ input {
 }
 
 .links line {
-  stroke: #999;
-  stroke-opacity: 0.6;
+  stroke: $auditor-grey;
 }
 
 svg {
-  border: solid grey 1px;
+  border: 2px solid $ashen-grey;
 }
 
 .node {
   fill: #cb6fe8;
-  stroke: #fff;
+  stroke: $global-background;
   stroke-width: 1.5px;
 
   &-subqueried {
-    fill: #c8c5c9;
+    fill: $pale-grey;
   }
 
   &-central {
     fill: #ff0766;
-    stroke: #fff;
   }
 
   &-flag {

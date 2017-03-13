@@ -1,6 +1,6 @@
 <template>
   <div class="hello">
-    <h2>synaptic-scout | isoprene-pumpjack</h2>
+    <div class="name-title">synaptic-scout | isoprene-pumpjack</div>
     <div class="credits">
       <div v-for="section in sections" :key="section.title" :class="section.className">
         <h4>{{section.title}}</h4>
@@ -106,10 +106,14 @@ export default {
 }
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
-h2 {
+
+@import '~sass-variables';
+
+.name-title {
+  font-size: $font-giant;
   font-weight: normal;
+  margin: $gutter-strip;
 }
 
 .credits {

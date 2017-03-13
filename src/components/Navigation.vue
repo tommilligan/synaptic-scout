@@ -17,7 +17,7 @@ export default {
 </script>
 <style lang="scss" scoped>
 
-$accent: #f78827;
+@import "~sass-variables";
 
 nav{
     display: inline-block;
@@ -26,24 +26,22 @@ nav{
   a{
     display: inline-block;
     padding: 10px 30px;
-    font-weight:bold;
-    color: #2c3e50;
-    font-size:16px;
+    font-weight: bold;
+    color: $blackish;
+    font-size: $font-large;
     text-decoration:none !important;
-    line-height:1;
-    transition:background-color 0.25s;
-    border-bottom: 3px solid lightgrey;
+    line-height: 1;
+    transition: all 0.25s;
+    border-bottom: 3px solid $ashen-grey;
 
     &:hover {
-      background-color: #ffece2;
+      background-color: $accent-light;
     }
 
     &:hover, &.router-link-active {
-      border-bottom-color:#f78827;
+      border-bottom-color: $accent;
     }
   }
 }
-
-
 
 </style>

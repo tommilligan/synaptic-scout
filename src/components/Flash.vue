@@ -19,21 +19,26 @@ export default {
 </script>
 <style lang="scss" scoped>
 
+@import "~sass-variables";
+
+$text-color: white;
+
 div {
   overflow: hidden;
-  background: #ffd1d1;
+  background: $warning-vivid;
   text-align: center;
   padding: 5px;
-  font-size: 0.9rem;
+  font-size: $font-small;
   font-weight: bold;
   position: relative;
+  color: $text-color;
 }
 
 .close {
   position: absolute;
   right: 6px;
   top: 6px;
-  opacity: 0.5;
+  opacity: 0.7;
 
   &:hover {
     opacity: 1;
@@ -41,11 +46,11 @@ div {
 
   &:before, &:after {
     position: absolute;
-    right: 6px;
+    right: 7px;
     content: ' ';
     height: 16px;
-    width: 4px;
-    background-color: #333;
+    width: 2px;
+    background-color: $text-color;
   }
 
   &:before {
