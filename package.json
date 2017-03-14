@@ -2,7 +2,7 @@
   "name": "synaptic-scout",
   "version": "0.0.3",
   "description": "View and explore large graph networks.",
-  "author": "Tom Milligan <tom@tommilligan.net>",
+  "author": "Tom Milligan <code@tommilligan.net>",
   "private": true,
   "scripts": {
     "dev": "node build/dev-server.js",

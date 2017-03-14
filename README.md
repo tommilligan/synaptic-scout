@@ -1,30 +1,22 @@
 # synaptic-scout
 
-> View and explore large graph networks.
+[![npm](https://img.shields.io/npm/synaptic-scout/npm.svg)]() [![license](https://img.shields.io/github/license/tommilligan/synaptic-scout.svg)]()
+[![Travis branch](https://img.shields.io/travis/tommilligan/synaptic-scout/develop.svg)]() [![Coveralls branch](https://img.shields.io/coveralls/tommilligan/synaptic-scout/develop.svg)]() [![Code Climate](https://img.shields.io/codeclimate/github/tommilligan/synaptic-scout.svg)]()
 
-## Build Setup
+## Installation
 
-``` bash
-# install dependencies
-npm install
-
-# serve with hot reload at localhost:8080
-npm run dev
-
-# build for production with minification
-npm run build
-
-# build for production and view the bundle analyzer report
-npm run build --report
-
-# run unit tests
-npm run unit
-
-# run e2e tests
-npm run e2e
-
-# run all tests
-npm test
+Install using npm
+```
+npm install synaptic-scout
 ```
 
-For detailed explanation on how things work, checkout the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).
+Run using
+```
+npm run start
+```
+
+## Usage
+
+This package was started based on the VueJS webpack template, [see here](https://github.com/vuejs-templates/webpack) for more information and commands.
+
+Develop using `npm run dev`
