@@ -4,16 +4,16 @@ node_js:
 install: npm install
 script: npm run unit
 deploy:
+  - provider: npm
+    email: "code@tommilligan.net"
+    api_key: "$NPM_API_KEY"
+    on:
+      all_branches: true
   - provider: heroku
     api_key:
       secure: $HEROKU_API_KEY
     app:
       develop: synaptic-scout-staging
       master: synaptic-scout
-  - provider: npm
-    email: "code@tommilligan.net"
-    api_key: "$NPM_API_KEY"
-    on:
-      all_branches: true
 addons:
     srcclr: true

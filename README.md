@@ -1,6 +1,6 @@
 # synaptic-scout
 
-[![npm](https://img.shields.io/npm/synaptic-scout/npm.svg)]() [![license](https://img.shields.io/github/license/tommilligan/synaptic-scout.svg)]()
+[![npm](https://img.shields.io/npm/v/synaptic-scout.svg)]() [![license](https://img.shields.io/github/license/tommilligan/synaptic-scout.svg)]()
 [![Travis branch](https://img.shields.io/travis/tommilligan/synaptic-scout/develop.svg)]() [![Coveralls branch](https://img.shields.io/coveralls/tommilligan/synaptic-scout/develop.svg)]() [![Code Climate](https://img.shields.io/codeclimate/github/tommilligan/synaptic-scout.svg)]()
 
 ## Installation
