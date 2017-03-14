@@ -13,7 +13,7 @@ module.exports = function (config) {
     // 2. add it to the `browsers` array below.
     browsers: ['PhantomJS'],
     frameworks: ['mocha', 'sinon-chai'],
-    reporters: ['spec', 'coverage'],
+    reporters: ['spec', 'coverage', 'coveralls'],
     files: [
       '../../node_modules/es6-promise/dist/es6-promise.auto.js',
       './index.js'
@@ -34,3 +34,5 @@ module.exports = function (config) {
     }
   })
 }
+
+
