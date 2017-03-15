@@ -8,7 +8,8 @@ deploy:
     email: "code@tommilligan.net"
     api_key: "$NPM_API_KEY"
     on:
-      all_branches: true
+      branch: master
+      tags: true 
   - provider: heroku
     api_key:
       secure: $HEROKU_API_KEY
@@ -16,4 +17,7 @@ deploy:
       develop: synaptic-scout-staging
       master: synaptic-scout
 addons:
-    srcclr: true
+  srcclr: true
+notifications:
+  email: false
+
