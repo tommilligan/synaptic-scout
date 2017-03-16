@@ -14,11 +14,7 @@ import { mapState, mapActions } from 'vuex'
 import * as d3 from 'd3'
 import d3Tip from "d3-tip"
 var d3CMenu = require('d3-context-menu');
-var urljoin = require('url-join');
 var _ = require('lodash');
-import axios from 'axios'
-
-import endpoints from '../constants/endpoints'
 
 d3.tip = d3Tip;
 d3.contextMenu = d3CMenu(d3);
@@ -68,21 +64,6 @@ export default {
           action: (elm, d, i) => {
             this.replaceSubgraph(d.props.id)
           }
-        },
-        {
-          divider: true
-        },
-        {
-          title: 'Search for neighbours',
-          action: (elm, d, i) => {
-            this.updateGraphWithSearch(d.props.id, this.addSubgraph)
-          }
-        },
-        {
-          title: 'Re-seed graph here',
-          action: (elm, d, i) => {
-            this.updateGraphWithSearch(d.props.id, this.replaceSubgraph)
-          }
         }
       ]
     }
@@ -105,22 +86,8 @@ export default {
   },
   methods: {
     submitQuery () {
-      this.updateGraphWithSearch(this.query, this.replaceSubgraph)
+      this.addSubgraph(this.query)
       this.query = ''
-    },
-    updateGraphWithSearch (search_id, thenCallback = (id) => {}) {
-      const seedUrl = urljoin(endpoints.seedgraph, `?label=${search_id}`)
-      console.log('Updating graph database with search ' + seedUrl)
-      axios.get(seedUrl)
-        .then((response) => {
-          const response_id = response.data.id
-          console.log(`Graph updated with node ${response_id}`)
-          thenCallback(response_id)
-        })
-        .catch((error) => {
-          console.error(error)
-          this.flashMessage('Error connecting to isoprene-pumpjack API')
-        })
     },
     intialiseGraph () {
       this.rootElement = d3.select("svg")
@@ -229,6 +196,9 @@ export default {
         .on('click', (d) => {
           this.toggleNodeFlag(d3.event.target, d)
         })
+        .on('doubleclick', (d) => {
+          this.addSubgraph(d3.event.target, d)
+        })
         .on('contextmenu', d3.contextMenu(this.menu, {
           onOpen: () => {
             this.simulation.stop();
@@ -273,8 +243,7 @@ export default {
     },
     ...mapActions ([
       'addSubgraph',
-      'replaceSubgraph',
-      'flashMessage'
+      'replaceSubgraph'
     ])
   }
 }

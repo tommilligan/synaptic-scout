@@ -30,7 +30,7 @@ const state = {
 // for debugging purposes.
 const mutations = {
   updateFlashMessage (state, message) {
-    console.debug('Updating flash message')
+    console.debug(`Updating flash message with ${message}`)
     state.flash = message
   },
   mergeGraphData (state, newData) {
@@ -45,9 +45,12 @@ const mutations = {
     console.debug(`Added ${mergedData.nodes.length - oldData.nodes.length} nodes and ${mergedData.links.length - oldData.links.length} links`)
     state.graph.data = mergedData
   },
-  replaceGraphData (state, newData) {
-    console.log('Replacing graph data')
-    state.graph.data = newData
+  clearGraphData (state) {
+    console.log('Clearing graph data')
+    state.graph.data = {
+      nodes: [],
+      links: []
+    }
   },
   updateLastSubquery (state, centralNodeId) {
     console.log('Updating the last subquery')
@@ -66,42 +69,49 @@ const mutations = {
 // actions are functions that causes side effects and can involve
 // asynchronous operations.
 const actions = {
+  getBackendUrlThen ({ commit }, {url, thenCallback = (response) => {}}) {
+    console.debug(`GETting backend resource ${url}`)
+    axios.get(url)
+      .then((response) => {
+        thenCallback(response)
+      })
+      .catch((error) => {
+        console.error(error)
+        this.flashMessage('Error connecting to isoprene-pumpjack API')
+      })
+  },
   flashMessage ({ commit }, message) {
-    console.debug('Flashing message')
+    console.debug(`Flashing message ${message}`)
     commit('updateFlashMessage', message)
   },
   flashClear ({ commit }) {
     console.debug('Clearing flash message')
     commit('updateFlashMessage', '')
   },
-  addSubgraph ({ commit }, centralNodeId) {
-    const getUrl = urljoin(endpoints.subgraph, centralNodeId)
-    console.log('Adding subgraph from ' + getUrl)
-    axios.get(getUrl)
-      .then((response) => {
-        commit('mergeGraphData', response.data)
-      })
-      .catch((error) => {
-        console.error(error)
-        commit('updateFlashMessage', 'Error connecting to isoprene-pumpjack API')
-      })
+  getSubgraphData ({ commit, dispatch }, {centralNodeId, thenCallback = (newData) => {}}) {
+    console.log(`Getting subgraph for ${centralNodeId}`)
+    const resourceUrl = urljoin(endpoints.subgraph, centralNodeId)
+    dispatch('getBackendUrlThen', {
+      url: resourceUrl,
+      thenCallback: thenCallback
+    })
     commit('addSubquery', centralNodeId)
     commit('updateLastSubquery', centralNodeId)
   },
-  replaceSubgraph ({ commit }, centralNodeId) {
-    const getUrl = urljoin(endpoints.subgraph, centralNodeId)
-    console.log('Replacing subgraph from ' + getUrl)
-    axios.get(getUrl)
-      .then((response) => {
-        commit('replaceGraphData', response.data)
-      })
-      .catch((error) => {
-        console.error(error)
-        commit('updateFlashMessage', 'Error connecting to isoprene-pumpjack API')
-      })
+  addSubgraph ({ commit, dispatch }, centralNodeId) {
+    console.debug(`Adding subgraph for ${centralNodeId}`)
+    dispatch('getSubgraphData', {
+      centralNodeId: centralNodeId,
+      thenCallback: (response) => {
+        commit('mergeGraphData', response.data)
+      }
+    })
+  },
+  replaceSubgraph ({ commit, dispatch }, centralNodeId) {
+    console.debug(`Replacing graph with subgraph for ${centralNodeId}`)
     commit('resetSubqueried')
-    commit('addSubquery', centralNodeId)
-    commit('updateLastSubquery', centralNodeId)
+    commit('clearGraphData')
+    dispatch('addSubgraph', centralNodeId)
   }
 }
 
