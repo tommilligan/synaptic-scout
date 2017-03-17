@@ -69,7 +69,7 @@ const mutations = {
 // actions are functions that causes side effects and can involve
 // asynchronous operations.
 const actions = {
-  getBackendUrlThen ({ commit }, {url, thenCallback = (response) => {}}) {
+  getBackendUrlThen ({ commit, dispatch }, {url, thenCallback = (response) => {}}) {
     console.debug(`GETting backend resource ${url}`)
     axios.get(url)
       .then((response) => {
@@ -77,7 +77,34 @@ const actions = {
       })
       .catch((error) => {
         console.error(error)
-        this.flashMessage('Error connecting to isoprene-pumpjack API')
+        var message = 'Error with isoprene-pumpjack'
+        var leaf = ''
+        if (error.response) {
+          console.debug('Error has response')
+          // The request was made, but the server responded with a status code
+          // that falls out of the range of 2xx
+          if (error.response.data && error.response.data.message) {
+            leaf = error.response.data.message
+          } else {
+            switch (error.response.status) {
+              case 503:
+                leaf = 'Service unavailable'
+                break
+            }
+          }
+        } else {
+          console.debug('Error has no response')
+          // Something happened in setting up the request that triggered an Error
+          switch (error.message) {
+            case 'Network Error':
+              leaf = 'Connection failed'
+              break
+            default:
+              leaf = error.message
+          }
+        }
+        message = (leaf) ? `${message}: ${leaf}` : message
+        dispatch('flashMessage', message)
       })
   },
   flashMessage ({ commit }, message) {
