@@ -1,6 +1,6 @@
 {
   "name": "synaptic-scout",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "View and explore large graph networks.",
   "author": "Tom Milligan <code@tommilligan.net>",
   "private": false,
