@@ -86,7 +86,7 @@ export default {
   },
   methods: {
     submitQuery () {
-      this.addSubgraph(this.query)
+      this.replaceSubgraph(this.query)
       this.query = ''
     },
     intialiseGraph () {
@@ -94,7 +94,7 @@ export default {
       this.rootElement.call(this.tipLabel)
       this.simulation = d3.forceSimulation()
         .force("link", d3.forceLink()
-          .distance(15)
+          .distance(10)
           .strength((link) => {
             return 3 / Math.min(this.countLinks(link.source), this.countLinks(link.target));
           })
@@ -152,9 +152,11 @@ export default {
       d.fy = null;
     },
     countLinks (d_id) {
-      return this.graphData.links.filter((p) => {
-        return p.source == d_id || p.target == d_id
-      }).length
+      var connected = _.filter(this.graphData.links, (p) => {
+        // TODO look at fixing this weird semi data binding edge case here
+        return p.source.id === d_id || p.target.id === d_id || p.source === d_id || p.target === d_id
+      })
+      return connected.length
     },
     restartGraph () {
       /** Reuseable d3 functions */
@@ -193,18 +195,17 @@ export default {
           this.tipLabel.hide(d, i)
           d3.select(d3.event.target).classed('node-hover', false)
         })
-        .on('click', (d) => {
-          this.toggleNodeFlag(d3.event.target, d)
-        })
-        .on('doubleclick', (d) => {
-          this.addSubgraph(d3.event.target, d)
+        .on('dblclick', (d) => {
+          this.addSubgraph(d.props.id)
         })
         .on('contextmenu', d3.contextMenu(this.menu, {
           onOpen: () => {
+            console.debug('Context menu opened')
             this.simulation.stop();
             this.tipLabel.hide()
           },
           onClose: () => {
+            console.debug('Context menu closed')
             this.simulation.restart();
           }
         }))
@@ -212,11 +213,6 @@ export default {
           .on("start", this.dragstarted)
           .on("drag", this.dragged)
           .on("end", this.dragended))
-        .attr("r", (d) => {
-          var allLinks = this.countLinks(d.id)
-          const base = 5
-          return parseInt(allLinks/3) + base
-        })
         .merge(this.node)
       this.node = this.node
         .classed("node-central", (d) => {
@@ -227,6 +223,11 @@ export default {
         })
         .classed("node-subqueried", (d) => {
           return _.includes(this.subqueried, d.props.id)
+        })
+        .attr("r", (d) => {
+          var allLinks = this.countLinks(d.id)
+          const base = 5
+          return parseInt(allLinks/3) + base
         })
 
       this.simulation
@@ -382,7 +383,7 @@ svg {
   stroke-width: 1.5px;
 
   &-dolphin {
-    fill: #cb6fe8;    
+    fill: #e3b7f1;    
   }
 
   &-document {
@@ -390,15 +391,15 @@ svg {
   }
 
   &-subqueried {
-    fill: $pale-grey;
+    fill: #c144e8;
   }
 
   &-central {
-    fill: #ff0766;
+    /* fill: #ff0766; */
   }
 
   &-flag {
-    stroke: #720067;
+    stroke: #380032;
     stroke-width: 2.5px;
   }
 

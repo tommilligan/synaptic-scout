@@ -38,6 +38,7 @@ const mutations = {
     const oldData = state.graph.data
     var mergedData = {}
 
+    // TODO for some reason these data types are different. Probably d3 binding?
     // if node already exists, overwrite, otherwise additional
     mergedData.nodes = _.unionBy(oldData.nodes, newData.nodes, node => node.id)
     // same for links
@@ -80,7 +81,6 @@ const actions = {
         var message = 'Error with isoprene-pumpjack'
         var leaf = ''
         if (error.response) {
-          console.debug('Error has response')
           // The request was made, but the server responded with a status code
           // that falls out of the range of 2xx
           if (error.response.data && error.response.data.message) {
@@ -93,7 +93,6 @@ const actions = {
             }
           }
         } else {
-          console.debug('Error has no response')
           // Something happened in setting up the request that triggered an Error
           switch (error.message) {
             case 'Network Error':
@@ -108,11 +107,11 @@ const actions = {
       })
   },
   flashMessage ({ commit }, message) {
-    console.debug(`Flashing message ${message}`)
+    console.log(`Flashing message ${message}`)
     commit('updateFlashMessage', message)
   },
   flashClear ({ commit }) {
-    console.debug('Clearing flash message')
+    console.log('Clearing flash message')
     commit('updateFlashMessage', '')
   },
   getSubgraphData ({ commit, dispatch }, {centralNodeId, thenCallback = (newData) => {}}) {
@@ -126,7 +125,7 @@ const actions = {
     commit('updateLastSubquery', centralNodeId)
   },
   addSubgraph ({ commit, dispatch }, centralNodeId) {
-    console.debug(`Adding subgraph for ${centralNodeId}`)
+    console.log(`Adding subgraph for ${centralNodeId}`)
     dispatch('getSubgraphData', {
       centralNodeId: centralNodeId,
       thenCallback: (response) => {
@@ -134,10 +133,14 @@ const actions = {
       }
     })
   },
-  replaceSubgraph ({ commit, dispatch }, centralNodeId) {
-    console.debug(`Replacing graph with subgraph for ${centralNodeId}`)
+  clearGraph ({ commit }) {
+    console.log(`Clearing graph data`)
     commit('resetSubqueried')
     commit('clearGraphData')
+  },
+  replaceSubgraph ({ commit, dispatch }, centralNodeId) {
+    console.log(`Replacing graph with subgraph for ${centralNodeId}`)
+    dispatch('clearGraph', centralNodeId)
     dispatch('addSubgraph', centralNodeId)
   }
 }
