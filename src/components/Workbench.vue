@@ -70,7 +70,6 @@ export default {
   },
   mounted () {
     this.intialiseGraph()
-    this.replaceSubgraph('59')
   },
   watch: {
     graphData: function (newData) {
@@ -194,6 +193,10 @@ export default {
         .on('mouseout', (d, i) => {
           this.tipLabel.hide(d, i)
           d3.select(d3.event.target).classed('node-hover', false)
+        })
+        .on('click', (d) => {
+          var elm = d3.event.target
+          this.toggleNodeFlag(elm, d)
         })
         .on('dblclick', (d) => {
           this.addSubgraph(d.props.id)
@@ -407,6 +410,5 @@ svg {
     fill: $accent;
   }
 }
-
 
 </style>

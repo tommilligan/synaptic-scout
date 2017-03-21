@@ -20,7 +20,8 @@ const state = {
     lastSubquery: '',
     subqueried: []
   },
-  flash: ''
+  flash: '',
+  loading: false
 }
 
 // mutations are operations that actually mutates the state.
@@ -33,9 +34,14 @@ const mutations = {
     console.debug(`Updating flash message with ${message}`)
     state.flash = message
   },
+  updateLoading (state, status) {
+    console.log(`Updating loading status to ${status}`)
+    state.loading = status
+  },
   mergeGraphData (state, newData) {
     console.log('Merging graph data')
     const oldData = state.graph.data
+    console.debug(`New data; ${newData.nodes.length} nodes and ${newData.links.length} links`)
     var mergedData = {}
 
     // TODO for some reason these data types are different. Probably d3 binding?
@@ -71,10 +77,12 @@ const mutations = {
 // asynchronous operations.
 const actions = {
   getBackendUrlThen ({ commit, dispatch }, {url, thenCallback = (response) => {}}) {
+    commit('updateLoading', true)
     console.debug(`GETting backend resource ${url}`)
     axios.get(url)
       .then((response) => {
         thenCallback(response)
+        commit('updateLoading', false)
       })
       .catch((error) => {
         console.error(error)
@@ -104,6 +112,7 @@ const actions = {
         }
         message = (leaf) ? `${message}: ${leaf}` : message
         dispatch('flashMessage', message)
+        commit('updateLoading', false)
       })
   },
   flashMessage ({ commit }, message) {

@@ -1,7 +1,8 @@
 <template>
   <div id="app">
+    <indicator-bar :loading="$store.state.loading" />
     <navigation />
-    <flash :message="$store.state.flash"/>
+    <flash :message="$store.state.flash" />
     <transition name="fade" mode="out-in">
       <router-view></router-view>
     </transition>
@@ -11,12 +12,14 @@
 <script>
 import Navigation from '@/components/Navigation'
 import Flash from '@/components/Flash'
+import IndicatorBar from '@/components/IndicatorBar'
 
 export default {
   name: 'app',
   components: {
     Navigation,
-    Flash
+    Flash,
+    IndicatorBar
   }
 }
 </script>
