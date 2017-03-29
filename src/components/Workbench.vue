@@ -24,7 +24,6 @@ export default {
   data () {
     return {
       query: '',
-      flaggedNodes: [],
       rootElement: undefined,
       simulation: undefined,
       node: undefined,
@@ -71,8 +70,14 @@ export default {
   mounted () {
     this.intialiseGraph()
   },
+  destroyed () {
+    this.clearGraph()
+  },
   watch: {
     graphData: function (newData) {
+      this.restartGraph()
+    },
+    flaggedNodes: function (newNodes) {
       this.restartGraph()
     }
   },
@@ -80,7 +85,8 @@ export default {
     ...mapState ({
       graphData: state => state.graph.data,
       lastSubquery: state => state.graph.lastSubquery,
-      subqueried: state => state.graph.subqueried
+      subqueried: state => state.graph.subqueried,
+      flaggedNodes: state => state.graph.flaggedNodes
     })
   },
   methods: {
@@ -111,19 +117,11 @@ export default {
         .attr("class", "nodes")
         .selectAll("circle")
     },
-    addNodeFlag (id) {
-      this.flaggedNodes.push(id)
-    },
-    removeNodeFlag (id) {
-      _.pull(this.flaggedNodes, id)
-    },
     toggleNodeFlag (elm, d) {
       if (_.includes(this.flaggedNodes, d.props.id)) {
         this.removeNodeFlag(d.props.id)
-        d3.select(elm).classed('node-flag', false)
       } else {
         this.addNodeFlag(d.props.id)
-        d3.select(elm).classed('node-flag', true)
       }
     },
     ticked () {
@@ -157,7 +155,7 @@ export default {
       })
       return connected.length
     },
-    restartGraph () {
+    restartGraph (simPause = false) {
       /** Reuseable d3 functions */
       const toggleClass = (el, className) => {
         d3.select(el).classed(className, () => {
@@ -247,7 +245,10 @@ export default {
     },
     ...mapActions ([
       'addSubgraph',
-      'replaceSubgraph'
+      'replaceSubgraph',
+      'clearGraph',
+      'addNodeFlag',
+      'removeNodeFlag'
     ])
   }
 }

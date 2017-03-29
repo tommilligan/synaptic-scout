@@ -70,6 +70,14 @@ const mutations = {
   addSubquery (state, centralNodeId) {
     console.log('Adding known subquery')
     state.graph.subqueried = _.concat(state.graph.subqueried, centralNodeId)
+  },
+  addNodeFlag (state, id) {
+    console.log(`Adding flag to ${id}`)
+    state.graph.flaggedNodes.push(id)
+  },
+  removeNodeFlag (state, id) {
+    console.log(`Removing flag to ${id}`)
+    state.graph.flaggedNodes = _.without(state.graph.flaggedNodes, id)
   }
 }
 
@@ -151,6 +159,12 @@ const actions = {
     console.log(`Replacing graph with subgraph for ${centralNodeId}`)
     dispatch('clearGraph', centralNodeId)
     dispatch('addSubgraph', centralNodeId)
+  },
+  addNodeFlag ({ commit, dispatch }, id) {
+    commit('addNodeFlag', id)
+  },
+  removeNodeFlag ({ commit, dispatch }, id) {
+    commit('removeNodeFlag', id)
   }
 }
 
