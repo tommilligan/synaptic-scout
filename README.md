@@ -4,7 +4,7 @@
 [![license](https://img.shields.io/github/license/tommilligan/synaptic-scout.svg)](https://pypi.python.org/pypi/isoprene-pumpjack)
 
 [![Travis branch](https://img.shields.io/travis/tommilligan/synaptic-scout/develop.svg)](https://travis-ci.org/tommilligan/synaptic-scout)
-[![Coveralls branch](https://img.shields.io/coveralls/tommilligan/synaptic-scout/develop.svg)]()
+[![codecov](https://codecov.io/gh/tommilligan/synaptic-scout/branch/develop/graph/badge.svg)](https://codecov.io/gh/tommilligan/synaptic-scout)
 [![Code Climate](https://img.shields.io/codeclimate/github/tommilligan/synaptic-scout.svg)](https://codeclimate.com/github/tommilligan/synaptic-scout/)
 [![David](https://img.shields.io/david/tommilligan/synaptic-scout.svg)](https://david-dm.org/tommilligan/synaptic-scout)
 
